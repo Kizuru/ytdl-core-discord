@@ -28,7 +28,7 @@ function download(url, options = {}) {
 			const canDemux = format && info.length_seconds != 0;
 			if (canDemux) options = { ...options, filter };
 			else if (info.length_seconds != 0) options = { ...options, filter: 'audioonly' };
-			if (canDemux) {
+			if (canDemux && options.bassBoost.length === 0) {
 				const demuxer = new prism.opus.WebmDemuxer();
 				return resolve(ytdl.downloadFromInfo(info, options).pipe(demuxer).on('end', () => demuxer.destroy()));
 			} else {
@@ -43,7 +43,7 @@ function download(url, options = {}) {
 						'-f', 's16le',
 						'-ar', '48000',
 						'-ac', '2',
-					],
+					].concat(options.bassBoost),
 				});
 				const opus = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
 				const stream = transcoder.pipe(opus);
